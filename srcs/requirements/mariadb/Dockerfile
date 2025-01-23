@@ -1,27 +1,21 @@
-FROM debian:buster
+FROM debian:bullseye
 
 #this exposes the port only to the other docker containers, but not to host
 EXPOSE 3306
 
-ARG DB_NAME=${DB_NAME}
-ARG DB_USER=${DB_USER}
-ARG DB_PASSWORD=${DB_PASSWORD}
-ARG DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+RUN apt-get update && apt-get install -y \
+    mariadb-server \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && apt-get install \
-	mariadb-server -y && \
-	rm -rf /var/lib/apt/lists/*
+COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/
+COPY tools/create_user.sh /docker-entrypoint.sh
 
-RUN rm /etc/mysql/mariadb.conf.d/50-server.cnf
-COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d
+RUN chmod +x /docker-entrypoint.sh
 
-COPY tools/create_user.sh /
-RUN bash ./create_user.sh
+# Fix permissions for /var/lib/mysql
+RUN chown -R mysql:mysql /var/lib/mysql
 
-# RUN service mysql start && \
-# 	mysql < create_db_user.sql && \
-RUN rm -rf create_user.sh
-
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["mysqld_safe"]
 
 # test if you can connect to maridb database

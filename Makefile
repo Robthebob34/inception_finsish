@@ -1,5 +1,7 @@
 all:
-	@sudo hostsed add 127.0.0.1 tblaase.42.fr && echo "successfully added tblaase.42.fr to /etc/hosts"
+	@chmod +x ./srcs/requirements/tools/setup.sh
+	@./srcs/requirements/tools/setup.sh
+	@sudo hostsed add 127.0.0.1 rheck.42.fr && echo "successfully added rheck.42.fr to /etc/hosts"
 	sudo docker compose -f ./srcs/docker-compose.yml up -d
 
 clean:
@@ -8,18 +10,20 @@ clean:
 #	sudo docker system prune -a
 
 fclean: clean
-	@sudo hostsed rm 127.0.0.1 tblaase.42.fr && echo "successfully removed tblaase.42.fr to /etc/hosts"
-	@if [ -d "/home/tblaase/data/wordpress" ]; then \
-	sudo rm -rf /home/tblaase/data/wordpress/* && \
-	echo "successfully removed all contents from /home/tblaase/data/wordpress/"; \
+	@sudo hostsed rm 127.0.0.1 rheck.42.fr && echo "successfully removed rheck.42.fr from /etc/hosts"
+	@if [ -d "/home/rheck/data/wordpress" ]; then \
+	sudo rm -rf /home/rheck/data/wordpress/* && \
+	echo "successfully removed all contents from /home/rheck/data/wordpress/"; \
 	fi;
 
-	@if [ -d "/home/tblaase/data/mariadb" ]; then \
-	sudo rm -rf /home/tblaase/data/mariadb/* && \
-	echo "successfully removed all contents from /home/tblaase/data/mariadb/"; \
+	@if [ -d "/home/rheck/data/mariadb" ]; then \
+	sudo rm -rf /home/rheck/data/mariadb/* && \
+	echo "successfully removed all contents from /home/rheck/data/mariadb/"; \
 	fi;
 
-re: fclean all
+re:
+	sudo docker compose -f ./srcs/docker-compose.yml down --rmi all
+	sudo docker compose -f ./srcs/docker-compose.yml up -d --build
 
 ls:
 	sudo docker image ls

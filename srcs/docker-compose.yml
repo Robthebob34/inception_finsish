@@ -1,13 +1,9 @@
-version: '3.5'
-
-
 networks:
   inception: {}
 
 services:
   mariadb:
     container_name: mariadb
-    image: mariadb
     build:
       context: ./requirements/mariadb
       args:
@@ -15,6 +11,12 @@ services:
         - DB_USER=${DB_USER}
         - DB_PASSWORD=${DB_PASSWORD}
         - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+    environment:
+      - MARIADB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MARIADB_DATABASE=${DB_NAME}
+      - MARIADB_USER=${DB_USER}
+      - MARIADB_PASSWORD=${DB_PASSWORD}
+    env_file: .env
     networks:
       - inception
     volumes:
@@ -23,8 +25,8 @@ services:
 
   wordpress:
     container_name: wordpress
-    image: wordpress
-    build: ./requirements/wordpress
+    build:
+      context: ./requirements/wordpress
     networks:
       - inception
     volumes:
@@ -36,8 +38,8 @@ services:
 
   nginx:
     container_name: nginx
-    image: nginx
-    build: ./requirements/nginx
+    build:
+      context: ./requirements/nginx
     ports:
       - "443:443"
     networks:
@@ -49,18 +51,17 @@ services:
       - mariadb
     restart: unless-stopped
 
-
 volumes:
   mariadb_v:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/tblaase/data/mariadb
+      device: /home/robin/data/mariadb
 
   wordpress_v:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/tblaase/data/wordpress
+      device: /home/robin/data/wordpress
